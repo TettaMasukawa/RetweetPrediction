@@ -88,3 +88,9 @@ class CreateDataLoader:
         dataloader_test = DataLoader(dataset_test, batch_size=256)
 
         return dataloader_train, dataloader_val, dataloader_test
+
+# #debug
+# MODEL_NAME = "cl-tohoku/bert-base-japanese-whole-word-masking"
+# cdl = CreateDataLoader(MODEL_NAME)
+# dataloader_train, dataloader_val, dataloader_test = cdl.create()
+# print("finish")

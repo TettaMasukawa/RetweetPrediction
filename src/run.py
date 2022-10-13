@@ -15,10 +15,10 @@ checkpoint = pl.callbacks.ModelCheckpoint(
     mode="min",
     save_top_k=1,
     save_weights_only=True,
-    dirpath="/disk/ssd14tc/tmasukawa/tweet-analysis/Retweet_Prediction/model",
+    dirpath="/home/tmasukawa/tweet-analysis/Retweet_Prediction/model",
 )
 
-trainer = pl.Trainer(gpus=[3], max_epochs=10, callbacks=[checkpoint], logger=[loggers.TensorBoardLogger("/disk/ssd14tc/tmasukawa/tweet-analysis/Retweet_Prediction/logs")])
+trainer = pl.Trainer(gpus=[3], max_epochs=10, callbacks=[checkpoint], logger=[loggers.TensorBoardLogger("/home/tmasukawa/tweet-analysis/Retweet_Prediction/logs")])
 
 model = Bert_pl(MODEL_NAME)
 
