@@ -79,10 +79,6 @@ class CreateDataLoader:
         dataset_val = dataset_for_loader[n_train : n_train + n_val] + dataset_for_loader_buzz[buzz_n_train : buzz_n_train + buzz_n_val]
         dataset_test = dataset_for_loader[n_train + n_val :] + dataset_for_loader_buzz[buzz_n_train + buzz_n_val :]
 
-        # dataset_train = dataset_for_loader_buzz[:buzz_n_train]
-        # dataset_val = dataset_for_loader_buzz[buzz_n_train : buzz_n_train + buzz_n_val]
-        # dataset_test = dataset_for_loader_buzz[buzz_n_train + buzz_n_val :]
-
         dataloader_train = DataLoader(dataset_train, batch_size=32, shuffle=True)
         dataloader_val = DataLoader(dataset_val, batch_size=256)
         dataloader_test = DataLoader(dataset_test, batch_size=256)

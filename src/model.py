@@ -20,10 +20,7 @@ class Bert_pl(pl.LightningModule):
         
         self.dropout = nn.Dropout(p=0.25)
         
-        self.ff1 = nn.Linear(128, 64)
-        self.ff2 = nn.Linear(64, 32)
-        self.ff3 = nn.Linear(33, 33)
-        self.ff4 = nn.Linear(33, 1)
+        self.ff1 = nn.Linear(129, 1)
         
         self.mean_squared_error = nn.MSELoss()
         self.mean_absolute_error = MeanAbsoluteError()
@@ -41,14 +38,9 @@ class Bert_pl(pl.LightningModule):
         logits = outputs.last_hidden_state[:,0,:]
         output = self.cls_layer1(logits)
         output = self.relu(output)
-        output = self.ff1(output)
-        output = self.relu(output)
-        output = self.ff2(output)
-        output = self.relu(output)
+        # output = self.dropout(output)
         output = torch.cat([output, followers], dim=1)
-        output = self.ff3(output)
-        output = self.relu(output)
-        output = self.ff4(output)
+        output = self.ff1(output)
         
         return output
 
@@ -95,7 +87,7 @@ class Bert_pl(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.Adam([
             {"params":self.bert.encoder.layer[-1].parameters(), "lr":5e-5},
-            {"params":self.ff4.parameters(), "lr":1e-5}
+            {"params":self.ff1.parameters(), "lr":1e-5}
         ])
         
         return [optimizer]

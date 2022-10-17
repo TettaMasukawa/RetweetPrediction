@@ -1,3 +1,7 @@
+import os
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+
 import pytorch_lightning as pl
 from pytorch_lightning import loggers
 
@@ -18,7 +22,7 @@ checkpoint = pl.callbacks.ModelCheckpoint(
     dirpath="/home/tmasukawa/tweet-analysis/Retweet_Prediction/model",
 )
 
-trainer = pl.Trainer(gpus=[3], max_epochs=10, callbacks=[checkpoint], logger=[loggers.TensorBoardLogger("/home/tmasukawa/tweet-analysis/Retweet_Prediction/logs")])
+trainer = pl.Trainer(gpus=[6], max_epochs=10, callbacks=[checkpoint], logger=[loggers.TensorBoardLogger("/home/tmasukawa/tweet-analysis/Retweet_Prediction/logs")])
 
 model = Bert_pl(MODEL_NAME)
 
