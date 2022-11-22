@@ -1,5 +1,9 @@
 transformers==4.18.0
 pytorch-lightning==1.6.1
-fugashi
 pandas
-scikit-learn
+IPython
+fugashi==1.1.0
+# pip insall fugashi[unidic]
+# python3 -m unidic download
+# pip uninstall torch
+# pip install torch==1.12.1+cu113 --extra-index-url https://download.pytorch.org/whl/cu113
