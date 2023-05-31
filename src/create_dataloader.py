@@ -19,18 +19,20 @@ class CreateDataLoader:
         self.model_name = model_name
 
     def create(self, debag=False):
+        # tokenizerの選択
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         # tokenizer = AutoTokenizer.from_pretrained(self.model_name, mecab_kwargs={"mecab_dic": "unidic", "mecab_option": None})
 
         max_length = 35
         dataset_for_loader = []
         dataset_for_loader_buzz = []
-        
+
         retweet_list = []
         text_len_list = []
 
         files = glob("") #random sampling dataのpath
-        
+
+        # random sampling dataの読み込み
         for file in files:
             file_csv = pd.read_csv(file, encoding="utf-8-sig", sep=",")
 
@@ -40,30 +42,30 @@ class CreateDataLoader:
                 if debag is True:
                     if i >= 10:
                         break
-                
+
                 text = str(file_csv["text"][i])
                 text = re.sub('""', 'wquote', text)
                 text = re.sub('"', "", text)
                 text = re.sub("wquote", '"', text)
                 text = re.sub("", "", text)
-                
+
                 targets = file_csv["retweet"][i]
-                
+
                 if re.search(r"[ぁ-んァ-ン]", text) is False:
                     print("Not Japanese")
                     continue
-                
+
                 if targets < 1:
                     continue
-                
+
                 retweet_list.append(targets)
                 text_len_list.append(len(text))
-                
+
                 targets = log2(targets + 1)
-                    
+ 
                 followers = [file_csv["followers_count"][i]]
                 party_type = [file_csv["party_type"][i]]
-                
+
                 encoding = tokenizer(
                     text, max_length=max_length, padding="max_length", truncation=True, 
                 )
@@ -73,43 +75,44 @@ class CreateDataLoader:
                 encoding["party_type"] = torch.tensor(party_type, dtype=torch.float)
                 encoding["text"] = text
                 dataset_for_loader.append(encoding)
-                
+
         buzz_files = glob("") # buzz dataのpath
-        
+
+        # buzz dataの読み込み
         for buzz_file in buzz_files:
             buzz_csv = pd.read_csv(buzz_file, encoding="utf-8-sig", sep=",")
-            
+
             for i in range(len(buzz_csv)):
                 if debag is True:
                     if i >= 10:
                         break
-                
+
                 text = str(buzz_csv["text"][i])
                 text = re.sub('""', 'wquote', text)
                 text = re.sub('"', "", text)
                 text = re.sub("wquote", '"', text)
                 text = re.sub("[\u3000 \t]", "", text)
-                
+
                 targets = buzz_csv["retweet"][i]
-                
+
                 if re.search(r"[ぁ-んァ-ン]", text) is False:
                     print("Not Japanese")
                     continue
-                
+
                 if targets > 300000:
                     continue
-                
+
                 if targets < 1:
                     continue
-                
+
                 retweet_list.append(targets)
                 text_len_list.append(len(text))
-                
+
                 targets = log2(targets + 1)
-                
+
                 followers = [buzz_csv["followers_count"][i]]
                 party_type = [buzz_csv["party_type"][i]]
-                
+
                 encoding = tokenizer(
                     text, max_length=max_length, padding="max_length", truncation=True
                 )
@@ -119,24 +122,26 @@ class CreateDataLoader:
                 encoding["party_type"] = torch.tensor(party_type, dtype=torch.float)
                 encoding["text"] = text
                 dataset_for_loader_buzz.append(encoding)
-        
+
         n = len(dataset_for_loader)
         n_train = int(0.95 * n)
         n_val = int(0.025 * n)
-        
+
         buzz_n = len(dataset_for_loader_buzz)
         buzz_n_train = int(0.8 * buzz_n)
         buzz_n_val = int(0.1 * buzz_n)
-        
+
+        # train, valid, testの分割
         dataset_train = dataset_for_loader[:n_train] + dataset_for_loader_buzz[:buzz_n_train]
-        dataset_val = dataset_for_loader[n_train : n_train + n_val] + dataset_for_loader_buzz[buzz_n_train : buzz_n_train + buzz_n_val]
-        dataset_test = dataset_for_loader[n_train + n_val :] + dataset_for_loader_buzz[buzz_n_train + buzz_n_val :]
-        
+        dataset_val = dataset_for_loader[n_train:n_train + n_val] + dataset_for_loader_buzz[buzz_n_train:buzz_n_train + buzz_n_val]
+        dataset_test = dataset_for_loader[n_train + n_val:] + dataset_for_loader_buzz[buzz_n_train + buzz_n_val:]
+
         print(f"The number of data : {n+buzz_n}{n , buzz_n}")
         print(f"The number of train : {len(dataset_train)}{n_train, buzz_n_train}")
         print(f"The number of valid : {len(dataset_val)}{n_val, buzz_n_val}")
         print(f"The number of test : {len(dataset_test)}{(n - n_train - n_val), (buzz_n - buzz_n_train - buzz_n_val)}")
-        
+
+        # データの分布の確認
         print(f"max_retweet: {max(retweet_list)}")
         print(f"min_retweet: {min(retweet_list)}")
         print(f"mean_retweet: {sum(retweet_list)/len(retweet_list)}")
@@ -145,12 +150,14 @@ class CreateDataLoader:
         print(f"min_text_len: {min(text_len_list)}")
         print(f"mean_text_len: {sum(text_len_list)/len(text_len_list)}")
 
-        plt.hist(retweet_list,bins=2**np.linspace(0,18.5,50),log=True)
+        # ヒストグラムの作成
+        plt.hist(retweet_list, bins=2**np.linspace(0, 18.5, 50), log=True)
         plt.xlabel("Retweet", fontsize=20)
         plt.xscale("log", base=2)
         plt.ylabel("Frequency", fontsize=20)
         plt.savefig("retweet4.png")
 
+        # dataloaderの作成
         dataloader_train = DataLoader(dataset_train, batch_size=32, shuffle=True)
         dataloader_val = DataLoader(dataset_val, batch_size=256)
         dataloader_test = DataLoader(dataset_test, batch_size=256)
