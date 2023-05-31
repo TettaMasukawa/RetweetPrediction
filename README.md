@@ -10,3 +10,7 @@ This system predicts the number of retweets from text data on Twitter.
 │   └── run.py  
 └── requirements.txt  
 </pre>
+
+create_dataloader: Formating data and create dataloader.  
+model: Define the model.  
+run: Run this program.  
